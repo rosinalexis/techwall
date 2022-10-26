@@ -18,7 +18,7 @@ export class TodoController {
 
     @Get('/:id')
     getTodoById(@Param('id') id: string) {
-        
+
         const todo = this.todos.find(t => t.id === +id);
         if (todo) {
             return todo;
@@ -36,15 +36,38 @@ export class TodoController {
         this.todos.push(newTodo);
     }
 
-    @Delete()
-    deleteTodo() {
-        console.log('Supprimer un todo.');
-        return 'Supprimer un todo.';
+    @Delete('/:id')
+    deleteTodo(
+        @Param('id') id: string
+    ) {
+        const index = this.todos.findIndex(todo => todo.id === +id);
+        if (index >= 0) {
+            this.todos.splice(index, 1);
+        } else {
+            throw new NotFoundException(`le todo avec l'id: ${id} n'existe pas.`);
+        }
+
+        return {
+            message: `Le Todo d'${id} à été supprimé.`,
+        };
     }
 
-    @Put()
-    modifyTodo() {
-        console.log('Modifier un todo.');
-        return 'Modifier todo.';
+    @Put('/:id')
+    modifyTodo(
+        @Param('id') id: string,
+        @Body() updatedTodo: Partial<Todo>
+    ) {
+        const todo = this.getTodoById(id);
+
+        if (todo) {
+            for (let key in updatedTodo) {
+                console.log(key);
+                todo[key] = updatedTodo[key]
+            }
+
+            return todo;
+        }
+
+        throw new NotFoundException(`Le Todo avec l'id:${id} n'existe pas.`);
     }
 }
