@@ -1,4 +1,4 @@
-@hostname = http://localhost:3000
+
 
 GET {{hostname}}
 
@@ -9,7 +9,12 @@ GET {{hostname}}/todo
 ###
 
 POST {{hostname}}/todo
+Content-Type: application/json
 
+{
+    "name":"second Todo",
+    "description":"mon second Todo"
+}
 
 ###
 PUT {{hostname}}/todo
