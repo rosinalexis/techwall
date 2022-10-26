@@ -6,6 +6,10 @@ GET {{hostname}}
 
 GET {{hostname}}/todo
 
+
+###
+
+GET {{hostname}}/todo/5
 ###
 
 POST {{hostname}}/todo
