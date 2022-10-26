@@ -1,0 +1,18 @@
+@hostname = http://localhost:3000
+
+GET {{hostname}}
+
+###
+
+GET {{hostname}}/todo
+
+###
+
+POST {{hostname}}/todo
+
+
+###
+PUT {{hostname}}/todo
+
+###
+DELETE {{hostname}}/todo
