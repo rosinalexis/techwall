@@ -1,5 +1,5 @@
-export class Todo {
-    id: number;
+export class AddTodoDto {
     name: string;
     description: string;
+
 }
