@@ -24,5 +24,10 @@ export class CvEntity extends TimestampEntity {
 
     @Column()
     cin: number;
-    
+
+    @Column()
+    job: string;
+
+    @Column({nullable: true})
+    path: string;
 }
