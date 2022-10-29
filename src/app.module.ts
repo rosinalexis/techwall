@@ -6,6 +6,7 @@ import {FirstMiddleware} from "./middlewares/first.middleware";
 import {ConfigModule} from "@nestjs/config";
 import {TypeOrmModule} from "@nestjs/typeorm";
 import { CvModule } from './cv/cv.module';
+import { UserModule } from './user/user.module';
 import * as dotenv from 'dotenv';
 
 dotenv.config();
@@ -28,7 +29,8 @@ dotenv.config();
             synchronize: true,
             autoLoadEntities: true
         }),
-        CvModule
+        CvModule,
+        UserModule
     ],
     controllers: [AppController],
     providers: [AppService],
