@@ -5,6 +5,8 @@ import {AddCvDto} from "./dto/add-cv.dto";
 import {UpdateCvDto} from "./dto/update-cv.dto";
 import {DeleteResult, UpdateResult} from "typeorm";
 import {JwtAuthGuard} from "../user/guards/jwt-auth-guard";
+import {User} from "./decorators/user.decorator";
+import {UserEntity} from "../user/entites/user.entity";
 
 @Controller('cv')
 export class CvController {
@@ -15,10 +17,14 @@ export class CvController {
     ) {
     }
 
-    @UseGuards(JwtAuthGuard)
+
     @Get()
-    async getAllCvs(): Promise<CvEntity[]> {
-        return await this.cvService.getCvs();
+    @UseGuards(JwtAuthGuard)
+    async getAllCvs(
+        @User() user: UserEntity
+    ): Promise<CvEntity[]> {
+
+        return await this.cvService.getCvs(user);
     }
 
     @Get('stats')
@@ -27,18 +33,23 @@ export class CvController {
     }
 
     @Get(':id')
+    @UseGuards(JwtAuthGuard)
     async getCvById(
+        @User() user: UserEntity,
         @Param('id', ParseIntPipe) id: number
     ): Promise<CvEntity> {
-        return await this.cvService.findCvById(id);
+        
+        return await this.cvService.findCvById(id, user);
     }
 
     @UseGuards(JwtAuthGuard)
     @Post()
     async addCv(
-        @Body() newCv: AddCvDto
+        @Body() newCv: AddCvDto,
+        @User() user: UserEntity
     ): Promise<CvEntity> {
-        return await this.cvService.addCv(newCv);
+
+        return await this.cvService.addCv(newCv, user);
     }
 
     @UseGuards(JwtAuthGuard)

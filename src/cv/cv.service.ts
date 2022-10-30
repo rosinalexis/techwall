@@ -1,9 +1,11 @@
-import {Injectable, NotFoundException} from '@nestjs/common';
+import {Injectable, NotFoundException, UnauthorizedException} from '@nestjs/common';
 import {DeleteResult, Repository, UpdateResult} from "typeorm";
 import {CvEntity} from "./entities/cv.entity";
 import {InjectRepository} from "@nestjs/typeorm";
 import {AddCvDto} from "./dto/add-cv.dto";
 import {UpdateCvDto} from "./dto/update-cv.dto";
+import {UserRolesEnum} from "../enums/user-roles.enum";
+import {UserEntity} from "../user/entites/user.entity";
 
 @Injectable()
 export class CvService {
@@ -14,22 +16,42 @@ export class CvService {
     ) {
     }
 
-    async findCvById(id: number): Promise<CvEntity> {
+    async findCvById(id: number, user): Promise<CvEntity> {
+
         const cv = await this.cvRepository.findOneBy({id});
 
         if (!cv) {
             throw new NotFoundException(`Le cv d'id ${id} n'existe pas`);
         }
 
-        return cv;
+        if (user.role === UserRolesEnum.ADMIN || user.id === cv.user.id) {
+            return cv;
+        }
+
+        throw new UnauthorizedException(`Vous ne pouvez pas accéder à ce cv.`)
+
     }
 
-    async getCvs(): Promise<CvEntity[]> {
-        return await this.cvRepository.find();
+    async getCvs(user): Promise<CvEntity[]> {
+        let userLst;
+        if (user.role === UserRolesEnum.ADMIN) {
+            userLst = await this.cvRepository.find();
+        } else {
+            userLst = await this.cvRepository.find({
+                    where: {
+                        user: user.id
+                    }
+                }
+            );
+        }
+        return userLst;
     }
 
-    async addCv(cv: AddCvDto): Promise<CvEntity> {
-        return await this.cvRepository.save(cv);
+    async addCv(cv: AddCvDto, user): Promise<CvEntity> {
+
+        const newCv = await this.cvRepository.create(cv);
+        newCv.user = user;
+        return await this.cvRepository.save(newCv);
     }
 
     async updateCv(id: number, cv: UpdateCvDto): Promise<CvEntity> {
@@ -45,13 +67,13 @@ export class CvService {
         return await this.cvRepository.save(newCv);
     }
 
-    async removeCv(id: number): Promise<CvEntity> {
-        const cvToRemove = await this.findCvById(id);
+    async removeCv(id: number, user: UserEntity): Promise<CvEntity> {
+        const cvToRemove = await this.findCvById(id, user);
         return await this.cvRepository.remove(cvToRemove);
     }
 
-    async softRemoveCv(id: number): Promise<CvEntity> {
-        const cvToRemove = await this.findCvById(id);
+    async softRemoveCv(id: number, user: UserEntity): Promise<CvEntity> {
+        const cvToRemove = await this.findCvById(id, user);
         return await this.cvRepository.softRemove(cvToRemove);
     }
 
@@ -66,6 +88,7 @@ export class CvService {
 
     async softDeleteCv(id: number): Promise<UpdateResult> {
         return await this.cvRepository.softDelete(id);
+
     }
 
     async restoreCv(id: number): Promise<UpdateResult> {
